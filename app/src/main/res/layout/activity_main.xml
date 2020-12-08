@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="30dp"
+    tools:context="cn.yan.android.demo.MainActivity">
+
+    <EditText
+        android:id="@+id/et_host_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:hint="@string/hint_input"></EditText>
+
+    <Button
+        android:id="@+id/bt_start_trace"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/start_trace"
+        android:layout_marginTop="30dp"></Button>
+
+    <TextView
+        android:id="@+id/tv_result_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"/>
+
+</LinearLayout>

@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">AndroidTracepath</string>
+    <string name="hint_input">input your host name</string>
+    <string name="start_trace">start trace</string>
+</resources>

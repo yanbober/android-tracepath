@@ -1,0 +1,3 @@
+include ':android-tracepath'
+include ':app'
+rootProject.name = "AndroidTracepath"
