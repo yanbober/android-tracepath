@@ -21,6 +21,7 @@ Callback2Java callback2Java;
 
 void callbackOnStart() {
     (*callback2Java.jniEnv)->CallVoidMethod(callback2Java.jniEnv, callback2Java.jObject, callback2Java.onStartMethodId);
+    LOGD("callbackOnStart.");
 }
 
 int callbackOnUpdate(const char* fmt, ...) {
@@ -40,11 +41,13 @@ int callbackOnUpdate(const char* fmt, ...) {
         jstring value = (*callback2Java.jniEnv)->NewStringUTF(callback2Java.jniEnv, buffer);
         (*callback2Java.jniEnv)->CallVoidMethod(callback2Java.jniEnv, callback2Java.jObject, callback2Java.onUpdateMethodId, value);
     }
+    LOGD("callbackOnUpdate [%s]", buffer);
     return ret;
 }
 
 void callbackOnEnd() {
     (*callback2Java.jniEnv)->CallVoidMethod(callback2Java.jniEnv, callback2Java.jObject, callback2Java.onEndMethodId);
+    LOGD("callbackOnEnd.");
 }
 
 jclass getJavaClass(JNIEnv* env) {
@@ -56,7 +59,7 @@ JNIEXPORT void JNICALL nativeInit(JNIEnv * env, jobject thiz) {
     callback2Java.jniEnv = env;
     callback2Java.jObject = thiz;
 
-    jclass jClass = getJavaClass(env);
+    jclass jClass = (*env)->GetObjectClass(env, thiz);
 
     callback2Java.onStartMethodId = (*env)->GetMethodID(env, jClass, "nativeOnStart", "()V");
     callback2Java.onUpdateMethodId = (*env)->GetMethodID(env, jClass, "nativeOnUpdate", "(Ljava/lang/String;)V");
@@ -68,12 +71,13 @@ JNIEXPORT void JNICALL nativeStartTrace(JNIEnv * env, jobject thiz, jstring host
     LOGD("nativeStartTrace enter.");
     const char * domin = (*env)->GetStringUTFChars(env, host_name, NULL);
     LOGD("host name is: %s", domin);
-
+    callbackOnStart();
     char* args[] = { "tracepath", domin };
     tracepath(2, args);
 
     (*env)->ReleaseStringUTFChars(env, host_name, domin);
     LOGD("nativeStartTrace end.");
+    callbackOnEnd();
 }
 
 static const JNINativeMethod gMethods[] = {

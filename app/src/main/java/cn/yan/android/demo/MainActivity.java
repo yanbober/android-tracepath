@@ -1,17 +1,15 @@
 package cn.yan.android.demo;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import cn.yan.android.tracepath.AndroidTracePath;
-import cn.yan.android.demo.R;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText mETHostname;
@@ -30,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mETHostname = findViewById(R.id.et_host_name);
         mBTStart = findViewById(R.id.bt_start_trace);
         mTVInfo = findViewById(R.id.tv_result_info);
+        mTVInfo.setMovementMethod(ScrollingMovementMethod.getInstance());
 
         mBTStart.setOnClickListener(this);
     }
@@ -72,27 +71,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
                 mBTStart.setEnabled(false);
                 mETHostname.setEnabled(false);
-                mTVInfo.setText("");
+                mTVInfo.setText("start......\n");
             }
         });
     }
 
     void callbackUpdate(String update) {
-//        mMainHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                mTVInfo.setText(String.format("%s\n%s\n", mTVInfo.getText(), update));
-//            }
-//        });
+        mMainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mTVInfo.setText(String.format("%s%s", mTVInfo.getText(), update));
+            }
+        });
     }
 
     void callbackEnd() {
-//        mMainHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                mBTStart.setEnabled(true);
-//                mETHostname.setEnabled(true);
-//            }
-//        });
+        mMainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mBTStart.setEnabled(true);
+                mETHostname.setEnabled(true);
+                mTVInfo.setText(String.format("%s%s", mTVInfo.getText(), "end......\n\n"));
+            }
+        });
     }
 }

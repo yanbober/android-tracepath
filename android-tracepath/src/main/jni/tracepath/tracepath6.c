@@ -58,7 +58,7 @@ struct hhistory
 struct hhistory his[64];
 int hisptr;
 
-sa_family_t family = AF_INET6;
+sa_family_t family = AF_UNSPEC;
 struct sockaddr_storage target;
 socklen_t targetlen;
 __u16 base_port;
@@ -373,7 +373,6 @@ static void usage(void) __attribute((noreturn));
 static void usage(void)
 {
 	fprintf(stderr, "Usage: tracepath6 [-n] [-b] [-l <len>] [-p port] <destination>\n");
-	exit(-1);
 }
 
 
@@ -438,7 +437,7 @@ int tracepath(int argc, char **argv)
 	sprintf(pbuf, "%u", base_port);
 
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = family;
+	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_protocol = IPPROTO_UDP;
 #ifdef USE_IDN
@@ -447,14 +446,11 @@ int tracepath(int argc, char **argv)
 	gai = getaddrinfo(argv[0], pbuf, &hints, &ai0);
 	if (gai) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(gai));
-		exit(1);
+        return 1;
 	}
 
 	fd = -1;
 	for (ai = ai0; ai; ai = ai->ai_next) {
-		/* sanity check */
-		if (family && ai->ai_family != family)
-			continue;
 		if (ai->ai_family != AF_INET6 &&
 		    ai->ai_family != AF_INET)
 			continue;
@@ -468,7 +464,7 @@ int tracepath(int argc, char **argv)
 	}
 	if (fd < 0) {
 		perror("socket/connect");
-		exit(1);
+        return 1;
 	}
 	freeaddrinfo(ai0);
 
@@ -485,12 +481,12 @@ int tracepath(int argc, char **argv)
 		    (on = IPV6_PMTUDISC_DO,
 		     setsockopt(fd, SOL_IPV6, IPV6_MTU_DISCOVER, &on, sizeof(on)))) {
 			perror("IPV6_MTU_DISCOVER");
-			exit(1);
+            return 1;
 		}
 		on = 1;
 		if (setsockopt(fd, SOL_IPV6, IPV6_RECVERR, &on, sizeof(on))) {
 			perror("IPV6_RECVERR");
-			exit(1);
+            return 1;
 		}
 		if (
 #ifdef IPV6_RECVHOPLIMIT
@@ -501,7 +497,7 @@ int tracepath(int argc, char **argv)
 #endif
 		    ) {
 			perror("IPV6_HOPLIMIT");
-			exit(1);
+            return 1;
 		}
 		if (!IN6_IS_ADDR_V4MAPPED(&(((struct sockaddr_in6 *)&target)->sin6_addr)))
 			break;
@@ -517,23 +513,23 @@ int tracepath(int argc, char **argv)
 		on = IP_PMTUDISC_DO;
 		if (setsockopt(fd, SOL_IP, IP_MTU_DISCOVER, &on, sizeof(on))) {
 			perror("IP_MTU_DISCOVER");
-			exit(1);
+            return 1;
 		}
 		on = 1;
 		if (setsockopt(fd, SOL_IP, IP_RECVERR, &on, sizeof(on))) {
 			perror("IP_RECVERR");
-			exit(1);
+            return 1;
 		}
 		if (setsockopt(fd, SOL_IP, IP_RECVTTL, &on, sizeof(on))) {
 			perror("IP_RECVTTL");
-			exit(1);
+            return 1;
 		}
 	}
 
 	pktbuf = malloc(mtu);
 	if (!pktbuf) {
 		perror("malloc");
-		exit(1);
+        return 1;
 	}
 
 	for (ttl = 1; ttl <= max_hops; ttl++) {
@@ -545,7 +541,7 @@ int tracepath(int argc, char **argv)
 		case AF_INET6:
 			if (setsockopt(fd, SOL_IPV6, IPV6_UNICAST_HOPS, &on, sizeof(on))) {
 				perror("IPV6_UNICAST_HOPS");
-				exit(1);
+                return 1;
 			}
 			if (!mapped)
 				break;
@@ -553,7 +549,7 @@ int tracepath(int argc, char **argv)
 		case AF_INET:
 			if (setsockopt(fd, SOL_IP, IP_TTL, &on, sizeof(on))) {
 				perror("IP_TTL");
-				exit(1);
+                return 1;
 			}
 		}
 
@@ -583,10 +579,10 @@ done:
 	if (hops_from>=0)
 		printf("back %d ", hops_from);
 	printf("\n");
-	exit(0);
+    return 0;
 
 pktlen_error:
 	fprintf(stderr, "Error: pktlen must be > %d and <= %d\n",
 		overhead, INT_MAX);
-	exit(1);
+    return 1;
 }

@@ -1,11 +1,8 @@
 package cn.yan.android.tracepath;
 
-import androidx.annotation.Keep;
-
 /**
  * @author yanbo1
  */
-@Keep
 public final class AndroidTracePath {
     static {
         System.loadLibrary("tracepath-compat");
@@ -15,10 +12,10 @@ public final class AndroidTracePath {
 
     public AndroidTracePath(StateListener stateListener) {
         this.mStateListener = stateListener;
-        nativeInit();
     }
 
     public void startTrace(String hostName) {
+        nativeInit();
         nativeStartTrace(hostName);
     }
 
